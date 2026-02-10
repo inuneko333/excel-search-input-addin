@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>検索＋入力アドイン</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="app">
+    <section class="card">
+      <label for="searchTerm" class="label">検索値</label>
+      <div class="search-row">
+        <input id="searchTerm" type="text" class="input main-input" placeholder="例: 12345" />
+        <button id="searchButton" class="button primary">検索</button>
+      </div>
+      <div id="statusMessage" class="status"></div>
+
+      <div class="card-section">
+        <div class="target-row">
+          現在の対象行: <span id="currentRowLabel">–</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header form-header">
+        <div class="card-title">入力フォーム1</div>
+        <button id="toggleForm1" class="link-button small">▼ 表示/非表示</button>
+      </div>
+      <div id="form1Body" class="form-body">
+        <div class="card-section">
+          <label for="form1Input" class="label">値を入力</label>
+          <div class="form-row">
+            <input id="form1Input" type="text" class="input" />
+            <button id="form1Write" class="button">書き込み</button>
+          </div>
+          <div class="form-note" id="form1Note"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header form-header">
+        <div class="card-title">入力フォーム2</div>
+        <button id="toggleForm2" class="link-button small">▼ 表示/非表示</button>
+      </div>
+      <div id="form2Body" class="form-body">
+        <div class="card-section">
+          <label for="form2Input" class="label">値を入力</label>
+          <div class="form-row">
+            <input id="form2Input" type="text" class="input" />
+            <button id="form2Write" class="button">書き込み</button>
+          </div>
+          <div class="form-note" id="form2Note"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header form-header">
+        <div class="card-title">12桁コード</div>
+        <button id="toggleCode12" class="link-button small">▼ 表示/非表示</button>
+      </div>
+      <div id="code12Body" class="form-body">
+        <div class="card-section">
+          <label for="code12Input" class="label">12桁の数字</label>
+          <div class="form-row">
+            <input id="code12Input" type="text" class="input" />
+            <button id="code12Write" class="button">書き込み</button>
+          </div>
+          <div class="code12-status">
+            <span id="code12Counter" class="code12-counter">0 / 12</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-wrapper">
+      <button id="toggleSettings" class="link-button">
+        ▶ 詳細設定を表示
+      </button>
+
+      <div id="settingsPanel" class="settings hidden">
+        <div class="card settings-card">
+          <div class="card-header">
+            <div class="card-title small">検索設定</div>
+          </div>
+          <div class="card-section">
+            <label for="searchColumnInput" class="label">検索対象列（A, B, C...）</label>
+            <input id="searchColumnInput" type="text" class="input" placeholder="A" />
+          </div>
+          <div class="card-section">
+            <label for="skipRowsInput" class="label">除外する先頭行数</label>
+            <input id="skipRowsInput" type="number" class="input" min="0" value="0" />
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <div class="card-header">
+            <div class="card-title small">フォーム1設定</div>
+          </div>
+          <div class="card-section">
+            <label for="form1ColumnInput" class="label">フォーム1書き込み列</label>
+            <input id="form1ColumnInput" type="text" class="input" placeholder="N" />
+          </div>
+          <div class="card-section">
+            <label for="form1FixedInput" class="label">固定値（任意）</label>
+            <input id="form1FixedInput" type="text" class="input" placeholder="例: 2026/02/10" />
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <div class="card-header">
+            <div class="card-title small">フォーム2設定</div>
+          </div>
+          <div class="card-section">
+            <label for="form2ColumnInput" class="label">フォーム2書き込み列</label>
+            <input id="form2ColumnInput" type="text" class="input" placeholder="J" />
+          </div>
+          <div class="card-section">
+            <label for="form2FixedInput" class="label">固定値（任意）</label>
+            <input id="form2FixedInput" type="text" class="input" placeholder="例: 承認済み" />
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <div class="card-header">
+            <div class="card-title small">12桁コード設定</div>
+          </div>
+          <div class="card-section">
+            <label for="code12ColumnInput" class="label">12桁コード書き込み列</label>
+            <input id="code12ColumnInput" type="text" class="input" placeholder="K" />
+          </div>
+        </div>
+
+        <div class="card-section settings-note">
+          ※ 設定はブラウザに保存されます
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="taskpane_input.js"></script>
+</body>
+</html>
