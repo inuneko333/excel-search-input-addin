@@ -1,0 +1,27 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:type="TaskPaneApp">
+  <Id>c2b8d2f1-1234-4aac-9f00-222233334444</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>tel mao</ProviderName>
+  <DefaultLocale>ja-JP</DefaultLocale>
+
+  <DisplayName DefaultValue="検索＋入力アドイン" />
+  <Description DefaultValue="検索した行に対して、指定列に値を書き込むためのアドイン" />
+
+  <IconUrl DefaultValue="https://inuneko333.github.io/excel-search-input-addin/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://inuneko333.github.io/excel-search-input-addin/assets/icon-64.png" />
+  <SupportUrl DefaultValue="https://inuneko333.github.io/excel-search-input-addin" />
+
+  <Hosts>
+    <Host Name="Workbook" />
+  </Hosts>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://inuneko333.github.io/excel-search-input-addin/taskpane_input.html" />
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>
