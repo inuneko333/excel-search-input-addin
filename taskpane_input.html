@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>検索＋入力アドイン</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<div id="app">
+  <section class="card">
+    <div class="h">検索</div>
+    <label class="label" for="searchTerm">検索値（例: 5桁コード）</label>
+    <div class="row">
+      <input id="searchTerm" class="input" placeholder="12345" />
+      <button id="searchBtn" class="btn primary" tabindex="-1" type="button">検索</button>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="small">対象行: <span id="targetRow">–</span></div>
+  </section>
+
+  <section class="card">
+    <div class="h">ページ（最優先）</div>
+    <div class="pageBox">
+      <div class="row" style="gap:10px">
+        <div class="small">ページ</div>
+        <div class="pageNum" id="pageNum">–</div>
+      </div>
+      <div class="pageMeta" id="pageMeta">まだ検索していません</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="h">入力</div>
+    <div id="forms"></div>
+    <div class="note">Tabで次の入力へ。各入力でEnterすると書き込み→次の入力に移動します。</div>
+  </section>
+
+  <details>
+    <summary>詳細設定</summary>
+    <div class="grid">
+      <section class="card">
+        <div class="h">検索設定</div>
+        <label class="label" for="searchCol">検索列（A, B, AA...）</label>
+        <input id="searchCol" class="input" value="A" />
+        <label class="label" for="skipRows">除外する先頭行数</label>
+        <input id="skipRows" class="input" type="number" min="0" value="0" />
+        <label class="label" for="pageSize">1ページの行数</label>
+        <input id="pageSize" class="input" type="number" min="1" value="18" />
+        <div class="note">※ 「ページ」= ceil((ヒット行 - 除外行) / 1ページ行数)</div>
+      </section>
+
+      <section class="card">
+        <div class="h">フォーム管理</div>
+        <div class="row">
+          <button id="addForm" class="btn" type="button">＋フォーム追加</button>
+          <button id="removeForm" class="btn" type="button">－最後を削除</button>
+        </div>
+        <div class="note">最大10個くらいを想定</div>
+      </section>
+    </div>
+  </details>
+</div>
+
+<script src="taskpane_input.js"></script>
+</body>
+</html>
