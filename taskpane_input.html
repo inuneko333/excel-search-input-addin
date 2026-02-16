@@ -23,8 +23,7 @@
       <button id="searchBtn" class="btn primary tiny" tabindex="-1" type="button">検索</button>
     </div>
     <div class="status" id="status"></div>
-    <div class="small">対象行: <span id="targetRow">–</span></div>
-    <div class="note">ホットキー: <b>Ctrl+Shift+F</b> で検索欄へ / <b>Enter</b>で検索</div>
+    <div class="note">ホットキー: <b>Ctrl+F2</b> で検索欄へ / <b>Enter</b>で検索</div>
   </section>
 
   <section class="card">
@@ -40,18 +39,16 @@
     <div class="grid">
       <section class="card">
         <div class="h">検索設定</div>
-        <div class="cfgGrid">
-          <div class="cfgLine">
-            <span class="small mini">検索列</span>
-            <input id="searchCol" class="miniInput" value="A" />
-            <span class="small mini">除外行</span>
-            <input id="skipRows" class="miniInput" type="number" min="0" value="0" />
-          </div>
-          <div class="cfgLine">
-            <span class="small mini">1ページ</span>
-            <input id="pageSize" class="miniInput" type="number" min="1" value="18" />
-            <span class="small">ページ=ceil((ヒット行-除外行)/1ページ)</span>
-          </div>
+        <div class="cfgLine">
+          <span class="small">検索列</span>
+          <input id="searchCol" class="miniInput" value="A" />
+          <span class="small">除外行</span>
+          <input id="skipRows" class="miniInput" type="number" min="0" value="0" />
+        </div>
+        <div class="cfgLine" style="margin-top:8px">
+          <span class="small">1ページ</span>
+          <input id="pageSize" class="miniInput" type="number" min="1" value="18" />
+          <span class="small">ページ=ceil((ヒット行-除外行)/1ページ)</span>
         </div>
       </section>
 
