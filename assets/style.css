@@ -1,29 +1,39 @@
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:10px;background:#f5f5f7;font-size:13px;color:#111}
 #app{display:flex;flex-direction:column;gap:10px}
-.card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
-.h{font-weight:900;font-size:13px;margin:0 0 8px}
-.label{display:block;font-size:11px;color:#666;margin:6px 0 4px}
+.card{background:#fff;border-radius:12px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.h{font-weight:900;font-size:12px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+.small{font-size:11px;color:#666}
+.status{margin-top:6px;font-size:12px;color:#444;min-height:14px}
 .row{display:flex;gap:8px;align-items:center}
 .input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid #d2d2d7;font-size:15px}
 .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.btn{border:none;border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;background:#e9e9ee}
-.btn.primary{background:#2563eb;color:#fff;font-weight:800}
-.small{font-size:11px;color:#666}
-.status{margin-top:8px;font-size:12px;color:#444;min-height:16px}
-.pageBox{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#e0edff,#f3f7ff);border:1px solid #c5d8ff;border-radius:12px;padding:12px}
-.pageNum{font-size:28px;font-weight:1000;color:#1d4ed8;min-width:32px;text-align:center}
-.pageMeta{font-size:11px;color:#3b4860}
-.formCard{border:1px solid #eee;border-radius:12px;padding:10px;margin-top:10px}
-.formTitle{font-weight:900;margin:0 0 6px}
-.counter{font-weight:900}
+.btn{border:none;border-radius:10px;padding:8px 10px;font-size:12px;cursor:pointer;background:#e9e9ee}
+.btn.primary{background:#2563eb;color:#fff;font-weight:900}
+.btn.tiny{padding:6px 8px;border-radius:8px;font-size:11px}
+.badge{display:inline-flex;align-items:baseline;gap:6px;background:#eef4ff;border:1px solid #c5d8ff;border-radius:999px;padding:6px 10px}
+.badge .num{font-size:18px;font-weight:1000;color:#1d4ed8;min-width:18px;text-align:center}
+.badge .meta{font-size:10px;color:#3b4860}
+.forms{display:flex;flex-direction:column;gap:8px}
+.formCard{border:1px solid #eee;border-radius:12px;padding:10px}
+.formTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.formTitle{font-weight:900;font-size:12px}
+.formCfgBtn{background:none;border:none;cursor:pointer;color:#2563eb;font-size:12px;padding:2px 4px;border-radius:8px}
+.formCfgBtn:hover{background:#f1f6ff}
+.formRow{display:flex;gap:8px;align-items:center}
+.writeBtn{padding:6px 6px;font-size:11px;border-radius:10px}
+.counter{font-weight:1000}
 .counter.bad{color:#d11}
-hr.sep{border:none;border-top:1px solid #eee;margin:10px 0}
+.cfg{margin-top:8px;padding-top:8px;border-top:1px dashed #e5e5e5;display:none}
+.cfg.open{display:block}
+.cfgGrid{display:grid;grid-template-columns:1fr;gap:8px}
+.cfgLine{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cfgLine .mini{width:72px;min-width:72px}
+.miniInput{padding:8px 10px;border-radius:10px;border:1px solid #d2d2d7;font-size:13px}
+.checkbox{display:inline-flex;gap:6px;align-items:center}
+.checkbox input{width:16px;height:16px}
 details{background:#fff;border:1px solid #eee;border-radius:12px;padding:10px}
-summary{cursor:pointer;font-weight:800}
+summary{cursor:pointer;font-weight:900}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .grid .card{box-shadow:none;border:1px solid #eee}
-.checkbox{display:flex;gap:8px;align-items:center;margin-top:6px}
-.checkbox input{width:16px;height:16px}
-.muted{opacity:.7}
-.note{font-size:11px;color:#666;margin-top:8px}
+.note{font-size:11px;color:#666;margin-top:6px}
