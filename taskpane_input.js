@@ -1,4 +1,4 @@
-const KEY="input_addin_v6";
+const KEY="input_addin_v7";
 const MAX_FORMS=10;
 
 function isValidCol(s){ return /^[A-Z]{1,3}$/.test((s||"").toUpperCase().trim()); }
@@ -50,6 +50,11 @@ function digitsOnly(s){ return String(s||"").replace(/\D/g,""); }
 function format12WithSpaces(raw){
   const d=digitsOnly(raw).slice(0,12);
   return d.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+}
+function focusAndSelect(el){
+  if(!el) return;
+  el.focus();
+  try{ el.select(); }catch{}
 }
 
 Office.onReady(()=>{
@@ -144,13 +149,13 @@ Office.onReady(()=>{
       function applyFixedUI(){
         if(f.useFixed){
           input.value = f.fixed || "";
-          input.readOnly = true; // ✅ Tabで飛ばさない
+          input.readOnly = true;
           input.classList.add("fixed");
           input.placeholder = "";
         }else{
           input.readOnly = false;
           input.classList.remove("fixed");
-          input.placeholder = f.useLen12 ? "0000 0000 0000" : "入力"; // ✅ （）を消す
+          input.placeholder = f.useLen12 ? "0000 0000 0000" : "入力";
           if(f.useLen12 && input.value){
             input.value = format12WithSpaces(input.value);
           }
@@ -163,6 +168,10 @@ Office.onReady(()=>{
         counter.textContent=`${raw.length}/12`;
         counter.classList.toggle("bad", raw.length!==12);
       }
+
+      input.addEventListener("focus", ()=>{
+        setTimeout(()=>{ try{ input.select(); }catch{} }, 0);
+      });
 
       input.addEventListener("input", ()=>{
         if(f.useFixed) return;
@@ -250,7 +259,7 @@ Office.onReady(()=>{
           setStatus("");
           const nextIdx=(idx+1)%st.forms.length;
           const next=document.getElementById(`in_${st.forms[nextIdx].id}`);
-          if(next) next.focus();
+          focusAndSelect(next);
         }catch(e){
           console.error(e);
           setStatus("書き込みに失敗（共有/保護/権限を確認）");
@@ -328,7 +337,7 @@ Office.onReady(()=>{
         setStatus("");
 
         const firstInput=document.getElementById(`in_${st.forms[0].id}`);
-        if(firstInput) firstInput.focus();
+        focusAndSelect(firstInput);
       });
     }catch(e){
       console.error(e);
@@ -336,17 +345,15 @@ Office.onReady(()=>{
     }
   }
 
-  function focusSearch(){ ui.term.focus(); ui.term.select(); }
-
   document.addEventListener("keydown", (e)=>{
     if(e.ctrlKey && (e.key==="F2" || e.code==="F2")){
       e.preventDefault();
-      focusSearch();
+      focusAndSelect(ui.term);
     }
   });
 
   ui.btn.addEventListener("click", runSearch);
-  ui.term.addEventListener("focus", (e)=>e.target.select());
+  ui.term.addEventListener("focus", (e)=>setTimeout(()=>{ try{ e.target.select(); }catch{} },0));
   ui.term.addEventListener("keydown", (ev)=>{ if(ev.key==="Enter"){ ev.preventDefault(); runSearch(); } });
 
   ui.term.focus();
