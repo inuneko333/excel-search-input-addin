@@ -1,4 +1,4 @@
-const KEY="input_addin_v5";
+const KEY="input_addin_v6";
 const MAX_FORMS=10;
 
 function isValidCol(s){ return /^[A-Z]{1,3}$/.test((s||"").toUpperCase().trim()); }
@@ -68,13 +68,6 @@ Office.onReady(()=>{
 
   function setStatus(msg){ ui.status.textContent = msg || ""; }
   function persistSettings(){
-    st.searchCol = isValidCol(ui.searchCol.value)?ui.searchCol.value.toUpperCase().trim():"A";
-    st.skipRows = Number(ui.skipRows.value)||0;
-    st.pageSize = Math.max(1, Number(ui.pageSize)||18);
-    saveState(st);
-  }
-  // bug fix: pageSize binding
-  function persistSettings2(){
     st.searchCol = isValidCol(ui.searchCol.value)?ui.searchCol.value.toUpperCase().trim():"A";
     st.skipRows = Number(ui.skipRows.value)||0;
     st.pageSize = Math.max(1, Number(ui.pageSize.value)||18);
@@ -151,13 +144,13 @@ Office.onReady(()=>{
       function applyFixedUI(){
         if(f.useFixed){
           input.value = f.fixed || "";
-          input.disabled = true;
+          input.readOnly = true; // ✅ Tabで飛ばさない
           input.classList.add("fixed");
           input.placeholder = "";
         }else{
-          input.disabled = false;
+          input.readOnly = false;
           input.classList.remove("fixed");
-          input.placeholder = f.useLen12 ? "12桁（4桁区切りOK）" : "入力";
+          input.placeholder = f.useLen12 ? "0000 0000 0000" : "入力"; // ✅ （）を消す
           if(f.useLen12 && input.value){
             input.value = format12WithSpaces(input.value);
           }
@@ -238,7 +231,7 @@ Office.onReady(()=>{
       });
 
       async function doWrite(){
-        persistSettings2();
+        persistSettings();
         if(!runtime.lastHitRow){ setStatus("先に検索して行を確定してください"); return; }
         const rowNum=runtime.lastHitRow;
         if(!isValidCol(f.col)){ setStatus(`${f.title}: 列指定が不正`); return; }
@@ -255,12 +248,9 @@ Office.onReady(()=>{
         try{
           await writeCell(f.col, rowNum, value);
           setStatus("");
-          // focus next enabled input
-          for(let step=0; step<st.forms.length; step++){
-            const j=(idx+1+step)%st.forms.length;
-            const el=document.getElementById(`in_${st.forms[j].id}`);
-            if(el && !el.disabled){ el.focus(); break; }
-          }
+          const nextIdx=(idx+1)%st.forms.length;
+          const next=document.getElementById(`in_${st.forms[nextIdx].id}`);
+          if(next) next.focus();
         }catch(e){
           console.error(e);
           setStatus("書き込みに失敗（共有/保護/権限を確認）");
@@ -289,10 +279,10 @@ Office.onReady(()=>{
     saveState(st); renderForms();
   });
 
-  [ui.searchCol, ui.skipRows, ui.pageSize].forEach(el=>el.addEventListener("change", persistSettings2));
+  [ui.searchCol, ui.skipRows, ui.pageSize].forEach(el=>el.addEventListener("change", persistSettings));
 
   async function runSearch(){
-    persistSettings2();
+    persistSettings();
     const term=ui.term.value.trim();
     if(!term){ setStatus("検索値を入力してください"); return; }
 
@@ -337,11 +327,8 @@ Office.onReady(()=>{
         ui.pageMeta.textContent=`行${firstHit}`;
         setStatus("");
 
-        // focus first enabled input
-        for(const f of st.forms){
-          const el=document.getElementById(`in_${f.id}`);
-          if(el && !el.disabled){ el.focus(); break; }
-        }
+        const firstInput=document.getElementById(`in_${st.forms[0].id}`);
+        if(firstInput) firstInput.focus();
       });
     }catch(e){
       console.error(e);
