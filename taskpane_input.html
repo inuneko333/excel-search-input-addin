@@ -38,7 +38,7 @@
     <summary>詳細設定</summary>
     <div class="grid">
       <section class="card">
-        <div class="h">検索設定</div>
+        <div class="h">検索・ページ設定</div>
         <div class="cfgLine">
           <span class="small">検索列</span>
           <input id="searchCol" class="miniInput" value="A" />
@@ -48,8 +48,17 @@
         <div class="cfgLine" style="margin-top:8px">
           <span class="small">1ページ</span>
           <input id="pageSize" class="miniInput" type="number" min="1" value="18" />
-          <span class="small">ページ=ceil((ヒット行-除外行)/1ページ)</span>
         </div>
+
+        <div class="cfgLine" style="margin-top:10px">
+          <label class="checkbox">
+            <input id="groupMode" type="checkbox" />
+            <span class="small"><b>一致グループ内</b>でページ算出</span>
+          </label>
+          <span class="small">列</span>
+          <input id="groupCol" class="miniInput" value="B" />
+        </div>
+        <div class="note">ONのとき：ヒット行の「指定列」の値と同じ値の行だけを数えてページを出します。</div>
       </section>
 
       <section class="card">

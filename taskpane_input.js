@@ -1,4 +1,4 @@
-const KEY="input_addin_v7";
+const KEY="input_addin_v8";
 const MAX_FORMS=10;
 
 function isValidCol(s){ return /^[A-Z]{1,3}$/.test((s||"").toUpperCase().trim()); }
@@ -15,6 +15,8 @@ function normalizeState(st){
     searchCol: isValidCol(base.searchCol)?base.searchCol.toUpperCase().trim():"A",
     skipRows: Number(base.skipRows)||0,
     pageSize: Math.max(1, Number(base.pageSize)||18),
+    groupMode: !!base.groupMode,
+    groupCol: isValidCol(base.groupCol)?base.groupCol.toUpperCase().trim():"B",
     forms: forms.slice(0,MAX_FORMS).map((f,idx)=>({
       id: f.id || (crypto.randomUUID?crypto.randomUUID():String(Date.now()+idx)),
       title: (f.title||`フォーム${idx+1}`).toString(),
@@ -34,9 +36,9 @@ function colToIndex(s){
   for(const ch of t){ const c=ch.charCodeAt(0); if(c<65||c>90) return 0; n=n*26+(c-64); }
   return n-1;
 }
-function calcPage(hitRow, skipRows, pageSize){
-  const logical=Math.max(1, hitRow - skipRows);
-  return Math.ceil(logical / pageSize);
+function pageFromIndex(index1Based, pageSize){
+  const i=Math.max(1, Number(index1Based)||1);
+  return Math.ceil(i / Math.max(1, Number(pageSize)||18));
 }
 async function writeCell(col,row,value){
   await Excel.run(async ctx=>{
@@ -64,20 +66,29 @@ Office.onReady(()=>{
     pageNum:$("pageNum"), pageMeta:$("pageMeta"),
     forms:$("forms"),
     searchCol:$("searchCol"), skipRows:$("skipRows"), pageSize:$("pageSize"),
+    groupMode:$("groupMode"), groupCol:$("groupCol"),
     addForm:$("addForm"), removeForm:$("removeForm"),
   };
 
   let st=normalizeState(loadState()); saveState(st);
 
-  ui.searchCol.value=st.searchCol; ui.skipRows.value=st.skipRows; ui.pageSize.value=st.pageSize;
+  ui.searchCol.value=st.searchCol;
+  ui.skipRows.value=st.skipRows;
+  ui.pageSize.value=st.pageSize;
+  ui.groupMode.checked=st.groupMode;
+  ui.groupCol.value=st.groupCol;
 
   function setStatus(msg){ ui.status.textContent = msg || ""; }
   function persistSettings(){
     st.searchCol = isValidCol(ui.searchCol.value)?ui.searchCol.value.toUpperCase().trim():"A";
     st.skipRows = Number(ui.skipRows.value)||0;
     st.pageSize = Math.max(1, Number(ui.pageSize.value)||18);
+    st.groupMode = !!ui.groupMode.checked;
+    st.groupCol = isValidCol(ui.groupCol.value)?ui.groupCol.value.toUpperCase().trim():"B";
     saveState(st);
+    ui.groupCol.classList.toggle("dim", !st.groupMode);
   }
+  ui.groupCol.classList.toggle("dim", !st.groupMode);
 
   function makeChip(text, cls){
     const s=document.createElement("span");
@@ -288,7 +299,7 @@ Office.onReady(()=>{
     saveState(st); renderForms();
   });
 
-  [ui.searchCol, ui.skipRows, ui.pageSize].forEach(el=>el.addEventListener("change", persistSettings));
+  [ui.searchCol, ui.skipRows, ui.pageSize, ui.groupMode, ui.groupCol].forEach(el=>el.addEventListener("change", persistSettings));
 
   async function runSearch(){
     persistSettings();
@@ -306,18 +317,23 @@ Office.onReady(()=>{
         used.load(["values","rowCount","columnCount","rowIndex","columnIndex"]);
         await ctx.sync();
 
-        const targetCol=colToIndex(st.searchCol);
-        const offset=targetCol - used.columnIndex;
-        let firstHit=null;
+        const searchIdxAbs=colToIndex(st.searchCol);
+        const searchOffset=searchIdxAbs - used.columnIndex;
 
-        if(offset>=0 && offset<used.columnCount){
-          for(let r=0;r<used.rowCount;r++){
-            const rowNum=used.rowIndex + r + 1;
-            if(rowNum<=st.skipRows) continue;
-            const v=used.values[r][offset];
-            if(v==null) continue;
-            if(String(v).trim()===term){ firstHit=rowNum; break; }
-          }
+        if(searchOffset<0 || searchOffset>=used.columnCount){
+          runtime.lastHitRow=null;
+          setStatus("検索列が範囲外（シートの使用範囲を確認）");
+          ui.pageMeta.textContent="—";
+          return;
+        }
+
+        let firstHit=null;
+        for(let r=0;r<used.rowCount;r++){
+          const rowNum=used.rowIndex + r + 1;
+          if(rowNum<=st.skipRows) continue;
+          const v=used.values[r][searchOffset];
+          if(v==null) continue;
+          if(String(v).trim()===term){ firstHit=rowNum; break; }
         }
 
         if(!firstHit){
@@ -331,7 +347,36 @@ Office.onReady(()=>{
         sh.getRange(`${st.searchCol}${firstHit}`).select();
         await ctx.sync();
 
-        const page=calcPage(firstHit, st.skipRows, st.pageSize);
+        let page=1;
+
+        if(!st.groupMode){
+          const index1 = Math.max(1, firstHit - st.skipRows);
+          page = pageFromIndex(index1, st.pageSize);
+        }else{
+          const groupIdxAbs=colToIndex(st.groupCol);
+          const groupOffset=groupIdxAbs - used.columnIndex;
+
+          if(groupOffset<0 || groupOffset>=used.columnCount){
+            const index1 = Math.max(1, firstHit - st.skipRows);
+            page = pageFromIndex(index1, st.pageSize);
+          }else{
+            const hitR = firstHit - (used.rowIndex + 1);
+            const groupKey = used.values[hitR][groupOffset];
+
+            let pos=0;
+            for(let r=0;r<used.rowCount;r++){
+              const rowNum=used.rowIndex + r + 1;
+              if(rowNum<=st.skipRows) continue;
+              const gv=used.values[r][groupOffset];
+              if(String(gv) === String(groupKey)){
+                pos++;
+                if(rowNum===firstHit) break;
+              }
+            }
+            page = pageFromIndex(pos||1, st.pageSize);
+          }
+        }
+
         ui.pageNum.textContent=String(page);
         ui.pageMeta.textContent=`行${firstHit}`;
         setStatus("");
