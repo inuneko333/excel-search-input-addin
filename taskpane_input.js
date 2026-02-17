@@ -1,4 +1,4 @@
-const KEY="input_addin_v8";
+const KEY="input_addin_v9";
 const MAX_FORMS=10;
 
 function isValidCol(s){ return /^[A-Z]{1,3}$/.test((s||"").toUpperCase().trim()); }
@@ -29,7 +29,12 @@ function normalizeState(st){
   };
 }
 
-let runtime={ lastHitRow:null };
+let runtime={
+  lastHitRow:null,
+  lastTerm:null,
+  hitRows:[],
+  hitIndex:0,
+};
 
 function colToIndex(s){
   const t=(s||"A").toUpperCase().trim(); let n=0;
@@ -301,6 +306,32 @@ Office.onReady(()=>{
 
   [ui.searchCol, ui.skipRows, ui.pageSize, ui.groupMode, ui.groupCol].forEach(el=>el.addEventListener("change", persistSettings));
 
+  function buildHitRows(used, searchOffset, term){
+    const rows=[];
+    for(let r=0;r<used.rowCount;r++){
+      const rowNum=used.rowIndex + r + 1;
+      if(rowNum<=st.skipRows) continue;
+      const v=used.values[r][searchOffset];
+      if(v==null) continue;
+      if(String(v).trim()===term) rows.push(rowNum);
+    }
+    return rows;
+  }
+
+  function groupPositionForRow(used, groupOffset, groupKey, targetRow){
+    let pos=0;
+    for(let r=0;r<used.rowCount;r++){
+      const rowNum=used.rowIndex + r + 1;
+      if(rowNum<=st.skipRows) continue;
+      const gv=used.values[r][groupOffset];
+      if(String(gv)===String(groupKey)){
+        pos++;
+        if(rowNum===targetRow) break;
+      }
+    }
+    return pos||1;
+  }
+
   async function runSearch(){
     persistSettings();
     const term=ui.term.value.trim();
@@ -327,58 +358,52 @@ Office.onReady(()=>{
           return;
         }
 
-        let firstHit=null;
-        for(let r=0;r<used.rowCount;r++){
-          const rowNum=used.rowIndex + r + 1;
-          if(rowNum<=st.skipRows) continue;
-          const v=used.values[r][searchOffset];
-          if(v==null) continue;
-          if(String(v).trim()===term){ firstHit=rowNum; break; }
-        }
-
-        if(!firstHit){
+        const hits = buildHitRows(used, searchOffset, term);
+        if(!hits.length){
           runtime.lastHitRow=null;
+          runtime.lastTerm=term;
+          runtime.hitRows=[];
+          runtime.hitIndex=0;
           setStatus("ヒットなし");
           ui.pageMeta.textContent="—";
           return;
         }
 
-        runtime.lastHitRow=firstHit;
-        sh.getRange(`${st.searchCol}${firstHit}`).select();
+        if(runtime.lastTerm === term && JSON.stringify(runtime.hitRows)===JSON.stringify(hits)){
+          runtime.hitIndex = (runtime.hitIndex + 1) % hits.length;
+        }else{
+          runtime.hitIndex = 0;
+        }
+        runtime.lastTerm = term;
+        runtime.hitRows = hits;
+
+        const hitRow = hits[runtime.hitIndex];
+        runtime.lastHitRow = hitRow;
+
+        sh.getRange(`${st.searchCol}${hitRow}`).select();
         await ctx.sync();
 
         let page=1;
 
         if(!st.groupMode){
-          const index1 = Math.max(1, firstHit - st.skipRows);
+          const index1 = Math.max(1, hitRow - st.skipRows);
           page = pageFromIndex(index1, st.pageSize);
         }else{
           const groupIdxAbs=colToIndex(st.groupCol);
           const groupOffset=groupIdxAbs - used.columnIndex;
-
           if(groupOffset<0 || groupOffset>=used.columnCount){
-            const index1 = Math.max(1, firstHit - st.skipRows);
+            const index1 = Math.max(1, hitRow - st.skipRows);
             page = pageFromIndex(index1, st.pageSize);
           }else{
-            const hitR = firstHit - (used.rowIndex + 1);
+            const hitR = hitRow - (used.rowIndex + 1);
             const groupKey = used.values[hitR][groupOffset];
-
-            let pos=0;
-            for(let r=0;r<used.rowCount;r++){
-              const rowNum=used.rowIndex + r + 1;
-              if(rowNum<=st.skipRows) continue;
-              const gv=used.values[r][groupOffset];
-              if(String(gv) === String(groupKey)){
-                pos++;
-                if(rowNum===firstHit) break;
-              }
-            }
-            page = pageFromIndex(pos||1, st.pageSize);
+            const pos = groupPositionForRow(used, groupOffset, groupKey, hitRow);
+            page = pageFromIndex(pos, st.pageSize);
           }
         }
 
         ui.pageNum.textContent=String(page);
-        ui.pageMeta.textContent=`行${firstHit}`;
+        ui.pageMeta.textContent=`行${hitRow}（${runtime.hitIndex+1}/${hits.length}）`;
         setStatus("");
 
         const firstInput=document.getElementById(`in_${st.forms[0].id}`);
@@ -390,8 +415,9 @@ Office.onReady(()=>{
     }
   }
 
+  // ✅ ホットキー：Ctrl+G（Fnキーに触れない）
   document.addEventListener("keydown", (e)=>{
-    if(e.ctrlKey && (e.key==="F2" || e.code==="F2")){
+    if(e.ctrlKey && !e.shiftKey && !e.altKey && (e.key==="g" || e.key==="G")){
       e.preventDefault();
       focusAndSelect(ui.term);
     }
